@@ -28,7 +28,9 @@ import (
 
 var (
 	//go:embed version.txt
-	version      string
+	version string
+	//go:embed msyh.ttf
+	fontBytes    []byte
 	mediaArg     = flag.String("v", "", "Local path to the video/audio file. (Triggers the CLI mode)")
 	urlArg       = flag.String("u", "", "HTTP URL to the media file. URL streaming does not support seek operations. (Triggers the CLI mode)")
 	subsArg      = flag.String("s", "", "Local path to the subtitles file.")
@@ -45,6 +47,43 @@ type flagResults struct {
 	dmrURL string
 	exit   bool
 	gui    bool
+}
+
+func saveTempFonts() *string {
+
+	// 获取临时目录路径
+	tempDir := os.TempDir()
+
+	// 创建 Fonts 文件夹路径
+	fontsDir := filepath.Join(tempDir, "Fonts")
+
+	// 如果 Fonts 文件夹不存在，则创建它
+	if _, err := os.Stat(fontsDir); os.IsNotExist(err) {
+		err := os.Mkdir(fontsDir, os.ModePerm)
+		if err != nil {
+			fmt.Println("无法创建Fonts文件夹：", err)
+			return nil
+		}
+	}
+
+	// 定义要保存的字体文件路径
+	fontFilePath := filepath.Join(fontsDir, "msyh.ttf")
+
+	// 将字体数据写入字体文件
+	err := os.WriteFile(fontFilePath, fontBytes, os.ModePerm)
+	if err != nil {
+		fmt.Println("无法保存字体文件：", err)
+		return nil
+	}
+
+	return &fontFilePath
+}
+
+func init() {
+	fontPath := saveTempFonts()
+	if fontPath != nil {
+		_ = os.Setenv("FYNE_FONT", *fontPath)
+	}
 }
 
 func main() {
