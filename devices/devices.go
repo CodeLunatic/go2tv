@@ -21,22 +21,29 @@ var (
 func LoadSSDPservices(delay int) (map[string]string, error) {
 	// Reset device list every time we call this.
 	urlList := make(map[string]string)
-	list, err := ssdp.Search(ssdp.All, delay, "")
+	list, err := Search(ssdp.All, delay, "")
 	if err != nil {
 		return nil, fmt.Errorf("LoadSSDPservices search error: %w", err)
 	}
 
 	for _, srv := range list {
+		var Type, Location string
+		switch s := srv.(type) {
+		case ssdp.Service:
+			Type, Location = s.Type, s.Location
+		case Service:
+			Type, Location = s.Type, s.Location
+		}
 		// We only care about the AVTransport services for basic actions
 		// (stop,play,pause). If we need support other functionalities
 		// like volume control we need to use the RenderingControl service.
-		if srv.Type == "urn:schemas-upnp-org:service:AVTransport:1" {
-			friendlyName, err := soapcalls.GetFriendlyName(context.Background(), srv.Location)
+		if Type == "urn:schemas-upnp-org:service:AVTransport:1" {
+			friendlyName, err := soapcalls.GetFriendlyName(context.Background(), Location)
 			if err != nil {
 				continue
 			}
 
-			urlList[srv.Location] = friendlyName
+			urlList[Location] = friendlyName
 		}
 	}
 
