@@ -5,6 +5,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"net/url"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -360,7 +361,7 @@ func setAVTransportSoapBuild(tvdata *TVPayload) ([]byte, error) {
 	}
 
 	mediaTitle := strings.TrimLeft(mediaTitlefromURL.Path, "/")
-
+	mediaTitle = filepath.Base(mediaTitle)
 	re, err := regexp.Compile(`[&<>\\]+`)
 	if err != nil {
 		return nil, fmt.Errorf("setAVTransportSoapBuild regex compile error: %w", err)
@@ -503,7 +504,7 @@ func setNextAVTransportSoapBuild(tvdata *TVPayload, clear bool) ([]byte, error) 
 	}
 
 	mediaTitle := strings.TrimLeft(mediaTitlefromURL.Path, "/")
-
+	mediaTitle = filepath.Base(mediaTitle)
 	re, err := regexp.Compile(`[&<>\\]+`)
 	if err != nil {
 		return nil, fmt.Errorf("setNextAVTransportSoapBuild regex compile error: %w", err)
